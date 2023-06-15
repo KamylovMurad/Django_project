@@ -7,6 +7,13 @@ from django.test import TestCase
 from django.urls import reverse
 
 from shopapp.models import Product
+from shopapp.utils import add_two_numbers
+
+
+class AddTwoNumbersTestCase(TestCase):
+    def test_add_two_numbers(self):
+        result = add_two_numbers(2, 3)
+        self.assertEqual(result, 5)
 
 
 class ProductCreateViewTestCase(TestCase):
@@ -29,6 +36,45 @@ class ProductCreateViewTestCase(TestCase):
         self.assertTrue(
             Product.objects.filter(name=self.product_name).exists()
         )
+
+
+class ProductDetailsTestCase(TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        # будет выполнено перед всеми тестами в классе
+        cls.product = Product.objects.create(name="Best Product")
+
+    @classmethod
+    def tearDownClass(cls):
+        # будет выполнено после всех тестов в классе
+        cls.product.delete()
+
+    # def setUp(self):
+    #     # будет выполнено перед каждым тестом
+    #     self.product = Product.objects.create(name="Best Product")
+    #
+    # def tearDown(self):
+    #     # будет выполнено после каждого теста
+    #     self.product.delete()
+
+    def test_get_product(self):
+        response = self.client.get(
+            reverse(
+                'shopapp:product_details',
+                kwargs={"pk": self.product.pk},
+            ),
+        )
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_product_and_check_links(self):
+        response = self.client.get(
+            reverse(
+                'shopapp:product_details',
+                kwargs={"pk": self.product.pk},
+            ),
+        )
+        self.assertContains(response, self.product.name)
 
 
 class ProductsListTestCase(TestCase):

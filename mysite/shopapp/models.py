@@ -1,5 +1,8 @@
+from typing import TYPE_CHECKING
+
 from django.contrib.auth.models import User
 from django.db import models
+from django.db.models import Manager
 
 
 def product_preview_directory_path(instance: "Product", filename: str) -> str:
@@ -13,8 +16,8 @@ class Product(models.Model):
     class Meta:
         ordering = ["name", "price"]
 
-    name = models.CharField(max_length=100)
-    description = models.TextField(null=False, blank=True)
+    name = models.CharField(max_length=100, db_index=True)
+    description = models.TextField(null=False, blank=True, db_index=True)
     price = models.DecimalField(default=0, max_digits=8, decimal_places=2)
     discount = models.SmallIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -24,6 +27,8 @@ class Product(models.Model):
     def __str__(self):
         return f"Product(pk={self.pk}, name={self.name!r})"
 
+    if TYPE_CHECKING:
+        objects: Manager
 
 def product_images_directory_path(instance: "ProductImage", filename: str) -> str:
     return "products/product_{pk}/images/{filename}".format(
